@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Tuần Hoàn Các Nguyên Tố Hóa Học - GDPT 2018</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        metal: '#7bc3b9',       /* Kim loại - Soft Teal/Cyan */
+                        metalHover: '#65b2a7',
+                        nonmetal: '#f89bb4',    /* Phi kim - Soft Pink/Rose */
+                        nonmetalHover: '#e7829d',
+                        noblegas: '#ffd11a',    /* Khí hiếm - Golden Yellow */
+                        noblegasHover: '#ebd000',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* Responsive Periodic Grid */
+        .periodic-grid {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(58px, 1fr));
+            gap: 4px;
+            min-width: 1100px;
+        }
+
+        /* Glassmorphic effect */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Element Tile transition effects */
+        .element-tile {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .element-tile:hover {
+            transform: scale(1.15) z-index(30);
+            z-index: 30;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        }
+
+        .dimmed {
+            opacity: 0.2 !important;
+            filter: grayscale(80%);
+            transform: scale(0.95);
+        }
+
+        /* Modal backdrop animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-modal {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- Sticky Navigation Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg text-white shadow-lg shadow-cyan-500/30">
+                    <i class="fa-solid to-atom text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-yellow-300">
+                        BẢNG TUẦN HOÀN CÁC NGUYÊN TỐ HÓA HỌC
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Theo chương trình GDPT 2018 - Kết Nối Tri Thức Với Cuộc Sống</p>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <!-- Search Box -->
+                <div class="relative flex-1 md:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm tên, kí hiệu, Z..." 
+                        class="w-full pl-9 pr-8 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                    <button id="clearSearch" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex items-center space-x-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700 text-xs">
+                    <button data-filter="all" class="filter-btn active bg-slate-700 text-white px-3 py-1.5 rounded-md font-medium transition-all">Tất cả</button>
+                    <button data-filter="Kim loại" class="filter-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-md font-medium transition-all flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#7bc3b9]"></span>Kim loại
+                    </button>
+                    <button data-filter="Phi kim" class="filter-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-md font-medium transition-all flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#f89bb4]"></span>Phi kim
+                    </button>
+                    <button data-filter="Khí hiếm" class="filter-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-md font-medium transition-all flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#ffd11a]"></span>Khí hiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- Top Information & Key Guide Header -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Textbook Visual Guide Block (Reference Image Style) -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-around gap-4 border border-slate-700 shadow-xl">
+                <div class="text-center sm:text-left">
+                    <span class="text-xs uppercase tracking-wider text-cyan-400 font-bold">Hướng Dẫn Chú Giải</span>
+                    <h3 class="text-lg font-bold text-slate-100">Cấu Trúc Ô Nguyên Tố</h3>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs">Quy chuẩn chuẩn mực SGK Hóa học phổ thông Việt Nam.</p>
+                </div>
+
+                <!-- Sample Tile (Carbon - 6) -->
+                <div class="relative w-36 h-36 bg-[#f89bb4] text-slate-900 rounded-xl p-2 font-bold shadow-lg flex flex-col justify-between border-2 border-slate-900/20">
+                    <!-- Callout Labels -->
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-black bg-slate-900/10 px-1 rounded" title="Số hiệu nguyên tử (Z)">6</span>
+                        <span class="text-[10px] font-semibold text-slate-800 text-right leading-tight" title="Độ âm điện">2.55</span>
+                    </div>
+                    <div class="text-center my-auto">
+                        <div class="text-3xl font-extrabold tracking-tight">C</div>
+                        <div class="text-xs font-bold truncate">Carbon</div>
+                    </div>
+                    <div class="text-center text-xs font-black border-t border-slate-900/20 pt-0.5">
+                        12
+                    </div>
+
+                    <!-- Annotations for Guide -->
+                    <div class="absolute -right-36 top-1/2 -translate-y-1/2 text-[11px] text-slate-300 space-y-1 hidden xl:block pointer-events-none">
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-left text-cyan-400 text-xs"></i> Số hiệu Z</div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-left text-cyan-400 text-xs"></i> Kí hiệu hóa học</div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-left text-cyan-400 text-xs"></i> Tên nguyên tố</div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-arrow-left text-cyan-400 text-xs"></i> Nguyên tử khối (*)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Legend & Standard Rules -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-700 shadow-xl">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-3">Phân Loại Nguyên Tố</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="flex items-center space-x-2.5 p-2 rounded-lg bg-slate-800/60 border border-slate-700/60">
+                            <div class="w-4 h-4 rounded bg-[#7bc3b9] shadow"></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Kim loại</div>
+                                <div class="text-[10px] text-slate-400">Metals</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2.5 p-2 rounded-lg bg-slate-800/60 border border-slate-700/60">
+                            <div class="w-4 h-4 rounded bg-[#f89bb4] shadow"></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Phi kim</div>
+                                <div class="text-[10px] text-slate-400">Non-metals</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2.5 p-2 rounded-lg bg-slate-800/60 border border-slate-700/60">
+                            <div class="w-4 h-4 rounded bg-[#ffd11a] shadow"></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Khí hiếm</div>
+                                <div class="text-[10px] text-slate-400">Noble Gases</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-3 italic border-t border-slate-800 pt-2">
+                    <span class="text-yellow-400 font-bold">(*) Ghi chú:</span> Giá trị nguyên tử khối hiển thị đã được làm tròn theo quy chuẩn SGK phổ thông để phục vụ tính toán hóa học (VD: Cl = 35.5, Cu = 64, Fe = 56).
+                </p>
+            </div>
+
+            <!-- Quick Stats & Info Widget -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-700 shadow-xl">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider mb-2">Thống Kê Tổng Quan</h3>
+                    <div class="grid grid-cols-3 gap-2 text-center my-2">
+                        <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700">
+                            <span class="block text-2xl font-black text-cyan-400" id="statMetals">94</span>
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold">Kim Loại</span>
+                        </div>
+                        <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700">
+                            <span class="block text-2xl font-black text-pink-400" id="statNonMetals">17</span>
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold">Phi Kim</span>
+                        </div>
+                        <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700">
+                            <span class="block text-2xl font-black text-yellow-400" id="statNobles">7</span>
+                            <span class="text-[10px] text-slate-400 uppercase font-semibold">Khí Hiếm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400 flex items-center justify-between border-t border-slate-800 pt-2">
+                    <span>Tổng số nguyên tố: <strong class="text-slate-200">118</strong></span>
+                    <span class="text-cyan-400 font-medium"><i class="fa-solid fa-hand-pointer mr-1"></i>Nhấp vào ô để xem chi tiết</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Periodic Table Container -->
+        <div class="glass-panel rounded-2xl p-4 border border-slate-800 shadow-2xl overflow-x-auto">
+            
+            <!-- Groups Labels Row (1-18 & IA-VIIIA) -->
+            <div class="periodic-grid mb-1 text-center font-bold text-slate-400 text-xs">
+                <!-- Group Headers IA..VIIIA -->
+                <div>IA<br><span class="text-[10px] font-normal text-slate-500">1</span></div>
+                <div>IIA<br><span class="text-[10px] font-normal text-slate-500">2</span></div>
+                <div>IIIB<br><span class="text-[10px] font-normal text-slate-500">3</span></div>
+                <div>IVB<br><span class="text-[10px] font-normal text-slate-500">4</span></div>
+                <div>VB<br><span class="text-[10px] font-normal text-slate-500">5</span></div>
+                <div>VIB<br><span class="text-[10px] font-normal text-slate-500">6</span></div>
+                <div>VIIB<br><span class="text-[10px] font-normal text-slate-500">7</span></div>
+                <div>VIIIB<br><span class="text-[10px] font-normal text-slate-500">8</span></div>
+                <div>VIIIB<br><span class="text-[10px] font-normal text-slate-500">9</span></div>
+                <div>VIIIB<br><span class="text-[10px] font-normal text-slate-500">10</span></div>
+                <div>IB<br><span class="text-[10px] font-normal text-slate-500">11</span></div>
+                <div>IIB<br><span class="text-[10px] font-normal text-slate-500">12</span></div>
+                <div>IIIA<br><span class="text-[10px] font-normal text-slate-500">13</span></div>
+                <div>IVA<br><span class="text-[10px] font-normal text-slate-500">14</span></div>
+                <div>VA<br><span class="text-[10px] font-normal text-slate-500">15</span></div>
+                <div>VIA<br><span class="text-[10px] font-normal text-slate-500">16</span></div>
+                <div>VIIA<br><span class="text-[10px] font-normal text-slate-500">17</span></div>
+                <div>VIIIA<br><span class="text-[10px] font-normal text-slate-500">18</span></div>
+            </div>
+
+            <!-- Main Periodic Grid -->
+            <div id="periodicGrid" class="periodic-grid">
+                <!-- Javascript dynamic injection of 118 element cards -->
+            </div>
+
+            <!-- Lanthanides & Actinides Separate Rows -->
+            <div class="mt-6 pt-4 border-t border-slate-800">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Họ Lanthanide & Actinide</span>
+                </div>
+                
+                <!-- Lanthanides Row -->
+                <div class="flex items-center mb-1">
+                    <div class="w-16 text-xs font-bold text-teal-400 shrink-0">57 - 71</div>
+                    <div id="lanthanidesGrid" class="periodic-grid flex-1"></div>
+                </div>
+
+                <!-- Actinides Row -->
+                <div class="flex items-center">
+                    <div class="w-16 text-xs font-bold text-pink-400 shrink-0">89 - 103</div>
+                    <div id="actinidesGrid" class="periodic-grid flex-1"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Detailed Modal View -->
+    <div id="elementModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+        <div class="glass-panel w-full max-w-4xl rounded-3xl border border-slate-700 shadow-2xl overflow-hidden animate-modal relative my-auto">
+            
+            <!-- Close Modal Button -->
+            <button id="closeModal" class="absolute top-4 right-4 w-10 h-10 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full flex items-center justify-center transition-all z-20 border border-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Header / Hero Banner -->
+            <div id="modalHeader" class="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <!-- Background ambient glow -->
+                <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+
+                <div class="flex items-center space-x-6 z-10 w-full md:w-auto">
+                    <!-- Giant Element Card -->
+                    <div id="modalTile" class="w-28 h-28 md:w-36 md:w-36 shrink-0 rounded-2xl p-3 flex flex-col justify-between font-bold shadow-2xl border-2 border-slate-900/30 text-slate-900">
+                        <div class="flex justify-between items-start text-xs md:text-sm">
+                            <span id="modalZ" class="font-extrabold bg-slate-900/10 px-1.5 py-0.5 rounded"></span>
+                            <span id="modalElectronegativity" class="font-semibold text-right"></span>
+                        </div>
+                        <div class="text-center my-auto">
+                            <div id="modalSymbol" class="text-3xl md:text-5xl font-black tracking-tight"></div>
+                            <div id="modalVietnameseName" class="text-xs md:text-sm font-bold truncate"></div>
+                        </div>
+                        <div id="modalAtomicMass" class="text-center text-xs md:text-sm font-black border-t border-slate-900/20 pt-0.5"></div>
+                    </div>
+
+                    <!-- Primary Info -->
+                    <div class="space-y-1">
+                        <span id="modalCategoryBadge" class="inline-block px-3 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase shadow"></span>
+                        <h2 id="modalTitle" class="text-2xl md:text-4xl font-black text-slate-100"></h2>
+                        <p id="modalSubTitle" class="text-sm text-slate-400 font-medium"></p>
+                        <div class="pt-2 flex flex-wrap gap-2 text-xs text-slate-300">
+                            <span class="bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700"><i class="fa-solid fa-layer-group text-cyan-400 mr-1.5"></i> Chu kỳ: <strong id="modalPeriod" class="text-white"></strong></span>
+                            <span class="bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700"><i class="fa-solid fa-table-columns text-cyan-400 mr-1.5"></i> Nhóm: <strong id="modalGroup" class="text-white"></strong></span>
+                            <span class="bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700"><i class="fa-solid fa-temperature-half text-cyan-400 mr-1.5"></i> Trạng thái: <strong id="modalState" class="text-white"></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bohr Atomic Visualizer Canvas -->
+                <div class="flex flex-col items-center justify-center bg-slate-900/60 p-3 rounded-2xl border border-slate-800 shrink-0 w-full md:w-auto">
+                    <canvas id="bohrCanvas" width="180" height="180" class="drop-shadow-md"></canvas>
+                    <span class="text-[11px] text-slate-400 font-medium mt-1">Mô hình nguyên tử Bohr</span>
+                </div>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-6 md:p-8 bg-slate-900/80 border-t border-slate-800 space-y-6 max-h-[60vh] overflow-y-auto">
+
+                <!-- Detailed Properties Grid -->
+                <div>
+                    <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-sm"></i> Thông Số Cấu Tạo & Lý Hóa
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                        
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-xs text-slate-400 block mb-0.5">Cấu hình Electron</span>
+                            <span id="modalConfig" class="font-mono font-bold text-slate-100 text-xs break-all"></span>
+                        </div>
+
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-xs text-slate-400 block mb-0.5">Tổng số Atomic Orbital (AO)</span>
+                            <span id="modalAO" class="font-black text-cyan-300 text-base"></span>
+                        </div>
+
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-xs text-slate-400 block mb-0.5">Electron hóa trị (Lớp ngoài)</span>
+                            <span id="modalValence" class="font-bold text-slate-100"></span>
+                        </div>
+
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-xs text-slate-400 block mb-0.5">Số oxi hóa phổ biến</span>
+                            <span id="modalOxidation" class="font-mono font-bold text-slate-100"></span>
+                        </div>
+
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-xs text-slate-400 block mb-0.5">Độ âm điện (Pauling)</span>
+                            <span id="modalElectronegativityFull" class="font-bold text-slate-100"></span>
+                        </div>
+
+                        <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                            <span class="text-xs text-slate-400 block mb-0.5">Khối lượng nguyên tử (chuẩn)</span>
+                            <span id="modalMassFull" class="font-bold text-slate-100"></span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Applications & Fun Facts -->
+                <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700/80">
+                    <h3 class="text-xs font-bold text-yellow-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-sm"></i> Ứng Dụng Thực Tế & Đặc Tính Nổi Bật
+                    </h3>
+                    <p id="modalApplications" class="text-sm text-slate-300 leading-relaxed font-normal"></p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Application Logic Script -->
+    <script>
+        /**
+         * COMPLETE 118 ELEMENTS DATASET
+         * Structured with high school SGK (GDPT 2018) rules & atomic masses.
+         */
+        const elementsData = [
+            { z: 1, symbol: 'H', name: 'Hydrogen', mass: '1', category: 'Phi kim', period: 1, group: 'IA', col: 1, row: 1, config: '1s¹', valence: '1', ox: '-1, +1', en: '2.20', state: 'Khí', app: 'Nhiên liệu sạch cho tương lai, sản xuất ammonia (NH3), lọc dầu mỏ và hydro hóa chất béo.' },
+            { z: 2, symbol: 'He', name: 'Helium', mass: '4', category: 'Khí hiếm', period: 1, group: 'VIIIA', col: 18, row: 1, config: '1s²', valence: '0', ox: '0', en: '-', state: 'Khí', app: 'Bơm khí cầu, làm mát nam siêu dẫn trong máy chụp MRI y tế, khí lặn biển sâu.' },
+            
+            { z: 3, symbol: 'Li', name: 'Lithium', mass: '7', category: 'Kim loại', period: 2, group: 'IA', col: 1, row: 2, config: '[He] 2s¹', valence: '1', ox: '+1', en: '0.98', state: 'Rắn', app: 'Sản xuất pin Lithium-ion cho điện thoại, xe điện; hợp kim nhẹ trong ngành hàng không.' },
+            { z: 4, symbol: 'Be', name: 'Beryllium', mass: '9', category: 'Kim loại', period: 2, group: 'IIA', col: 2, row: 2, config: '[He] 2s²', valence: '2', ox: '+2', en: '1.57', state: 'Rắn', app: 'Làm cửa sổ tia X, hợp kim siêu bền trong linh kiện tàu vũ trụ và vệ tinh.' },
+            { z: 5, symbol: 'B', name: 'Boron', mass: '11', category: 'Phi kim', period: 2, group: 'IIIA', col: 13, row: 2, config: '[He] 2s² 2p¹', valence: '3', ox: '+3', en: '2.04', state: 'Rắn', app: 'Thủy tinh borosilicate chịu nhiệt (Pyrex), chất bán dẫn, sợi boron trong chất liệu siêu nhẹ.' },
+            { z: 6, symbol: 'C', name: 'Carbon', mass: '12', category: 'Phi kim', period: 2, group: 'IVA', col: 14, row: 2, config: '[He] 2s² 2p²', valence: '4', ox: '-4, +2, +4', en: '2.55', state: 'Rắn', app: 'Nền tảng của sự sống hữu cơ, kim cương (trang sức/mũi khoan), than hoạt tính lọc nước.' },
+            { z: 7, symbol: 'N', name: 'Nitrogen', mass: '14', category: 'Phi kim', period: 2, group: 'VA', col: 15, row: 2, config: '[He] 2s² 2p³', valence: '5', ox: '-3, +1, +2, +3, +4, +5', en: '3.04', state: 'Khí', app: 'Sản xuất phân bón đạm, môi trường bảo quản thực phẩm, nitrogen lỏng đông lạnh y tế.' },
+            { z: 8, symbol: 'O', name: 'Oxygen', mass: '16', category: 'Phi kim', period: 2, group: 'VIA', col: 16, row: 2, config: '[He] 2s² 2p⁴', valence: '6', ox: '-2', en: '3.44', state: 'Khí', app: 'Duy trì sự hô hấp của sinh vật, sự cháy, sử dụng trong luyện thép và bình khí y tế.' },
+            { z: 9, symbol: 'F', name: 'Fluorine', mass: '19', category: 'Phi kim', period: 2, group: 'VIIA', col: 17, row: 2, config: '[He] 2s² 2p⁵', valence: '7', ox: '-1', en: '3.98', state: 'Khí', app: 'Sản xuất kem đánh răng chống sâu răng (Fluoride), chất chống dính Teflon, khí làm lạnh.' },
+            { z: 10, symbol: 'Ne', name: 'Neon', mass: '20', category: 'Khí hiếm', period: 2, group: 'VIIIA', col: 18, row: 2, config: '[He] 2s² 2p⁶', valence: '8', ox: '0', en: '-', state: 'Khí', app: 'Đèn quảng cáo Neon phát sáng màu đỏ-cam rực rỡ, bút thử điện, laser helium-neon.' },
+
+            { z: 11, symbol: 'Na', name: 'Sodium (Natri)', mass: '23', category: 'Kim loại', period: 3, group: 'IA', col: 1, row: 3, config: '[Ne] 3s¹', valence: '1', ox: '+1', en: '0.93', state: 'Rắn', app: 'Muối ăn (NaCl), xà phòng (NaOH), đèn đường hơi sodium vàng, truyền dẫn thần kinh.' },
+            { z: 12, symbol: 'Mg', name: 'Magnesium', mass: '24', category: 'Kim loại', period: 3, group: 'IIA', col: 2, row: 3, config: '[Ne] 3s²', valence: '2', ox: '+2', en: '1.31', state: 'Rắn', app: 'Hợp kim nhẹ chế tạo vỏ máy bay, ô tô, pháo hoa (cháy sáng trắng), nhân diệp lục thực vật.' },
+            { z: 13, symbol: 'Al', name: 'Aluminium (Nhôm)', mass: '27', category: 'Kim loại', period: 3, group: 'IIIA', col: 13, row: 3, config: '[Ne] 3s² 3p¹', valence: '3', ox: '+3', en: '1.61', state: 'Rắn', app: 'Vật liệu xây dựng, lon nước giải khát, vỏ máy bay, dây dẫn điện cao thế nhẹ.' },
+            { z: 14, symbol: 'Si', name: 'Silicon', mass: '28', category: 'Phi kim', period: 3, group: 'IVA', col: 14, row: 3, config: '[Ne] 3s² 3p²', valence: '4', ox: '-4, +2, +4', en: '1.90', state: 'Rắn', app: 'Trái tim của linh kiện bán dẫn (Chip máy tính), pin mặt trời, thủy tinh, cao su silicone.' },
+            { z: 15, symbol: 'P', name: 'Phosphorus', mass: '31', category: 'Phi kim', period: 3, group: 'VA', col: 15, row: 3, config: '[Ne] 3s² 3p³', valence: '5', ox: '-3, +3, +5', en: '2.19', state: 'Rắn', app: 'Sản xuất phân bón lân, đầu que diêm, thành phần cấu tạo xương và ADN con người.' },
+            { z: 16, symbol: 'S', name: 'Sulfur (Lưu huỳnh)', mass: '32', category: 'Phi kim', period: 3, group: 'VIA', col: 16, row: 3, config: '[Ne] 3s² 3p⁴', valence: '6', ox: '-2, +4, +6', en: '2.58', state: 'Rắn', app: 'Sản xuất H2SO4 (hóa chất công nghiệp số 1), lưu hóa cao su làm lốp xe, thuốc trừ sâu.' },
+            { z: 17, symbol: 'Cl', name: 'Chlorine', mass: '35.5', category: 'Phi kim', period: 3, group: 'VIIA', col: 17, row: 3, config: '[Ne] 3s² 3p⁵', valence: '7', ox: '-1, +1, +3, +5, +7', en: '3.16', state: 'Khí', app: 'Khử trùng nước sinh hoạt, chất tẩy trắng, sản xuất nhựa PVC, muối ăn.' },
+            { z: 18, symbol: 'Ar', name: 'Argon', mass: '40', category: 'Khí hiếm', period: 3, group: 'VIIIA', col: 18, row: 3, config: '[Ne] 3s² 3p⁶', valence: '8', ox: '0', en: '-', state: 'Khí', app: 'Khí bảo vệ trong hàn kim loại, bơm trong bóng đèn dây tóc, kính cách nhiệt 2 lớp.' },
+
+            { z: 19, symbol: 'K', name: 'Potassium (Kali)', mass: '39', category: 'Kim loại', period: 4, group: 'IA', col: 1, row: 4, config: '[Ar] 4s¹', valence: '1', ox: '+1', en: '0.82', state: 'Rắn', app: 'Phân bón kali cho cây trồng, duy trì cân bằng điện giải và nhịp tim sinh học.' },
+            { z: 20, symbol: 'Ca', name: 'Calcium', mass: '40', category: 'Kim loại', period: 4, group: 'IIA', col: 2, row: 4, config: '[Ar] 4s²', valence: '2', ox: '+2', en: '1.00', state: 'Rắn', app: 'Thành phần chính cấu tạo xương, răng, đá vôi (CaCO3), xi măng xây dựng, vôi sống.' },
+            { z: 21, symbol: 'Sc', name: 'Scandium', mass: '45', category: 'Kim loại', period: 4, group: 'IIIB', col: 3, row: 4, config: '[Ar] 3d¹ 4s²', valence: '3', ox: '+3', en: '1.36', state: 'Rắn', app: 'Hợp kim nhôm-scandium làm gậy thể thao, khung xe đạp cao cấp, linh kiện máy bay.' },
+            { z: 22, symbol: 'Ti', name: 'Titanium', mass: '48', category: 'Kim loại', period: 4, group: 'IVB', col: 4, row: 4, config: '[Ar] 3d² 4s²', valence: '4', ox: '+4', en: '1.54', state: 'Rắn', app: 'Siêu kim loại nhẹ, cứng, chống ăn mòn; dùng trong hàng không, khớp nhân tạo y tế.' },
+            { z: 23, symbol: 'V', name: 'Vanadium', mass: '51', category: 'Kim loại', period: 4, group: 'VB', col: 5, row: 4, config: '[Ar] 3d³ 4s²', valence: '5', ox: '+5', en: '1.63', state: 'Rắn', app: 'Thép hợp kim vanadium làm lò xo, dụng cụ cơ khí, chìa khóa vặn chống mài mòn.' },
+            { z: 24, symbol: 'Cr', name: 'Chromium', mass: '52', category: 'Kim loại', period: 4, group: 'VIB', col: 6, row: 4, config: '[Ar] 3d⁵ 4s¹', valence: '6', ox: '+2, +3, +6', en: '1.66', state: 'Rắn', app: 'Mạ chrome sáng bóng chống gỉ, thành phần quan trọng sản xuất thép không gỉ (Inox).' },
+            { z: 25, symbol: 'Mn', name: 'Manganese', mass: '55', category: 'Kim loại', period: 4, group: 'VIIB', col: 7, row: 4, config: '[Ar] 3d⁵ 4s²', valence: '7', ox: '+2, +4, +7', en: '1.55', state: 'Rắn', app: 'Khử oxygen trong gia công thép, sản xuất pin khô kiềm (Alkaline), thuốc tím KMnO4.' },
+            { z: 26, symbol: 'Fe', name: 'Iron (Sắt)', mass: '56', category: 'Kim loại', period: 4, group: 'VIIIB', col: 8, row: 4, config: '[Ar] 3d⁶ 4s²', valence: '2,3', ox: '+2, +3', en: '1.83', state: 'Rắn', app: 'Kim loại phổ biến nhất: sản xuất thép, cầu đường, nhà cửa, hemoglobin vận chuyển O2 trong máu.' },
+            { z: 27, symbol: 'Co', name: 'Cobalt', mass: '59', category: 'Kim loại', period: 4, group: 'VIIIB', col: 9, row: 4, config: '[Ar] 3d⁷ 4s²', valence: '2,3', ox: '+2, +3', en: '1.88', state: 'Rắn', app: 'Pin lithium-ion cao cấp, nam châm vĩnh cửu, màu xanh cobalt trong gốm sứ.' },
+            { z: 28, symbol: 'Ni', name: 'Nickel', mass: '59', category: 'Kim loại', period: 4, group: 'VIIIB', col: 10, row: 4, config: '[Ar] 3d⁸ 4s²', valence: '2', ox: '+2, +3', en: '1.91', state: 'Rắn', app: 'Thép không gỉ, tiền xu, pin sạc NiMH, chất xúc tác trong hóa dầu.' },
+            { z: 29, symbol: 'Cu', name: 'Copper (Đồng)', mass: '64', category: 'Kim loại', period: 4, group: 'IB', col: 11, row: 4, config: '[Ar] 3d¹⁰ 4s¹', valence: '1,2', ox: '+1, +2', en: '1.90', state: 'Rắn', app: 'Dẫn điện, dẫn nhiệt tuyệt vời: lõi dây điện, ống dẫn nước, đồng thau, đồng đen.' },
+            { z: 30, symbol: 'Zn', name: 'Zinc (Kẽm)', mass: '65', category: 'Kim loại', period: 4, group: 'IIB', col: 12, row: 4, config: '[Ar] 3d¹⁰ 4s²', valence: '2', ox: '+2', en: '1.65', state: 'Rắn', app: 'Tấm tôn mạ kẽm chống gỉ, hợp kim đúc, thuốc vi lượng tăng đề kháng.' },
+            { z: 31, symbol: 'Ga', name: 'Gallium', mass: '70', category: 'Kim loại', period: 4, group: 'IIIA', col: 13, row: 4, config: '[Ar] 3d¹⁰ 4s² 4p¹', valence: '3', ox: '+3', en: '1.81', state: 'Rắn', app: 'Kim loại tan chảy ngay trong lòng bàn tay (30°C), sản xuất LED xanh và chip GaAs.' },
+            { z: 32, symbol: 'Ge', name: 'Germanium', mass: '73', category: 'Kim loại', period: 4, group: 'IVA', col: 14, row: 4, config: '[Ar] 3d¹⁰ 4s² 4p²', valence: '4', ox: '+4', en: '2.01', state: 'Rắn', app: 'Thấu kính hồng ngoại quan sát ban đêm, sợi cáp quang viễn thông, linh kiện điện tử.' },
+            { z: 33, symbol: 'As', name: 'Arsenic', mass: '75', category: 'Phi kim', period: 4, group: 'VA', col: 15, row: 4, config: '[Ar] 3d¹⁰ 4s² 4p³', valence: '5', ox: '-3, +3, +5', en: '2.18', state: 'Rắn', app: 'Chất bán dẫn GaAs, từng được dùng trong thuốc trừ sâu (độc tính cao).' },
+            { z: 34, symbol: 'Se', name: 'Selenium', mass: '79', category: 'Phi kim', period: 4, group: 'VIA', col: 16, row: 4, config: '[Ar] 3d¹⁰ 4s² 4p⁴', valence: '6', ox: '-2, +4, +6', en: '2.55', state: 'Rắn', app: 'Máy photo xơ-rô (xerography), cảm biến ánh sáng, dầu gội trị gàu.' },
+            { z: 35, symbol: 'Br', name: 'Bromine', mass: '80', category: 'Phi kim', period: 4, group: 'VIIA', col: 17, row: 4, config: '[Ar] 3d¹⁰ 4s² 4p⁵', valence: '7', ox: '-1, +1, +3, +5', en: '2.96', state: 'Lỏng', app: 'Phi kim dạng lỏng duy nhất ở nhiệt độ phòng, chất chống cháy, tráng phim ảnh (AgBr).' },
+            { z: 36, symbol: 'Kr', name: 'Krypton', mass: '84', category: 'Khí hiếm', period: 4, group: 'VIIIA', col: 18, row: 4, config: '[Ar] 3d¹⁰ 4s² 4p⁶', valence: '8', ox: '0', en: '3.00', state: 'Khí', app: 'Bóng đèn flash chụp ảnh tốc độ cao, laser phẫu thuật mắt y khoa.' },
+
+            { z: 37, symbol: 'Rb', name: 'Rubidium', mass: '85.5', category: 'Kim loại', period: 5, group: 'IA', col: 1, row: 5, config: '[Kr] 5s¹', valence: '1', ox: '+1', en: '0.82', state: 'Rắn', app: 'Đồng hồ nguyên tử độ chính xác cao, động cơ đẩy ion cho vệ tinh không gian.' },
+            { z: 38, symbol: 'Sr', name: 'Strontium', mass: '88', category: 'Kim loại', period: 5, group: 'IIA', col: 2, row: 5, config: '[Kr] 5s²', valence: '2', ox: '+2', en: '0.95', state: 'Rắn', app: 'Tạo màu đỏ rực rỡ trong pháo hoa, sơn phát quang tự nhiên.' },
+            { z: 39, symbol: 'Y', name: 'Yttrium', mass: '89', category: 'Kim loại', period: 5, group: 'IIIB', col: 3, row: 5, config: '[Kr] 4d¹ 5s²', valence: '3', ox: '+3', en: '1.22', state: 'Rắn', app: 'Vật liệu siêu dẫn nhiệt độ cao, laser YAG dùng trong phẫu thuật gọt hàm/nhãn khoa.' },
+            { z: 40, symbol: 'Zr', name: 'Zirconium', mass: '91', category: 'Kim loại', period: 5, group: 'IVB', col: 4, row: 5, config: '[Kr] 4d² 5s²', valence: '4', ox: '+4', en: '1.33', state: 'Rắn', app: 'Vỏ thanh nhiên liệu lò phản ứng hạt nhân, đá giả kim cương Cubic Zirconia (CZ).' },
+            { z: 41, symbol: 'Nb', name: 'Niobium', mass: '93', category: 'Kim loại', period: 5, group: 'VB', col: 5, row: 5, config: '[Kr] 4d⁴ 5s¹', valence: '5', ox: '+5', en: '1.60', state: 'Rắn', app: 'Thép siêu hợp kim trong động cơ tên lửa, nam châm siêu dẫn máy gia tốc hạt.' },
+            { z: 42, symbol: 'Mo', name: 'Molybdenum', mass: '96', category: 'Kim loại', period: 5, group: 'VIB', col: 6, row: 5, config: '[Kr] 4d⁵ 5s¹', valence: '6', ox: '+6', en: '2.16', state: 'Rắn', app: 'Thép chịu nhiệt độ cực cao, chất bôi trơn công nghiệp chịu áp suất lớn.' },
+            { z: 43, symbol: 'Tc', name: 'Technetium', mass: '98', category: 'Kim loại', period: 5, group: 'VIIB', col: 7, row: 5, config: '[Kr] 4d⁵ 5s²', valence: '7', ox: '+4, +7', en: '1.90', state: 'Rắn', app: 'Nguyên tố nhân tạo đầu tiên, chất phóng xạ đồng vị dùng trong chẩn đoán y học hạt nhân.' },
+            { z: 44, symbol: 'Ru', name: 'Ruthenium', mass: '101', category: 'Kim loại', period: 5, group: 'VIIIB', col: 8, row: 5, config: '[Kr] 4d⁷ 5s¹', valence: '3,4', ox: '+3, +4', en: '2.20', state: 'Rắn', app: 'Lớp mạ tiếp điểm điện chống ăn mòn, xúc tác trong tổng hợp hóa hữu cơ.' },
+            { z: 45, symbol: 'Rh', name: 'Rhodium', mass: '103', category: 'Kim loại', period: 5, group: 'VIIIB', col: 9, row: 5, config: '[Kr] 4d⁸ 5s¹', valence: '3', ox: '+3', en: '2.28', state: 'Rắn', app: 'Một trong những kim loại đắt nhất thế giới; làm bộ chuyển đổi khí thải ô tô.' },
+            { z: 46, symbol: 'Pd', name: 'Palladium', mass: '106', category: 'Kim loại', period: 5, group: 'VIIIB', col: 10, row: 5, config: '[Kr] 4d¹⁰', valence: '2,4', ox: '+2, +4', en: '2.20', state: 'Rắn', app: 'Lọc khí hydrogen, đồ trang sức vàng trắng, bộ lọc khí thải phương tiện giao thông.' },
+            { z: 47, symbol: 'Ag', name: 'Silver (Bạc)', mass: '108', category: 'Kim loại', period: 5, group: 'IB', col: 11, row: 5, config: '[Kr] 4d¹⁰ 5s¹', valence: '1', ox: '+1', en: '1.93', state: 'Rắn', app: 'Dẫn điện tốt nhất trong tất cả kim loại; đồ trang sức, tráng gương, kháng khuẩn y tế.' },
+            { z: 48, symbol: 'Cd', name: 'Cadmium', mass: '112', category: 'Kim loại', period: 5, group: 'IIB', col: 12, row: 5, config: '[Kr] 4d¹⁰ 5s²', valence: '2', ox: '+2', en: '1.69', state: 'Rắn', app: 'Pin Ni-Cd có thể sạc lại, thanh hấp thụ neutron trong lò phản ứng hạt nhân.' },
+            { z: 49, symbol: 'In', name: 'Indium', mass: '115', category: 'Kim loại', period: 5, group: 'IIIA', col: 13, row: 5, config: '[Kr] 4d¹⁰ 5s² 5p¹', valence: '3', ox: '+3', en: '1.78', state: 'Rắn', app: 'Lớp phủ ITO mỏng trong màn hình cảm ứng smartphone, tivi LCD, tấm năng lượng mặt trời.' },
+            { z: 50, symbol: 'Sn', name: 'Tin (Thiếc)', mass: '119', category: 'Kim loại', period: 5, group: 'IVA', col: 14, row: 5, config: '[Kr] 4d¹⁰ 5s² 5p²', valence: '2,4', ox: '+2, +4', en: '1.96', state: 'Rắn', app: 'Tráng vỏ hộp thực phẩm (sắt tây), hợp kim mối hàn điện tử, đồng thau.' },
+            { z: 51, symbol: 'Sb', name: 'Antimony', mass: '122', category: 'Kim loại', period: 5, group: 'VA', col: 15, row: 5, config: '[Kr] 4d¹⁰ 5s² 5p³', valence: '3,5', ox: '-3, +3, +5', en: '2.05', state: 'Rắn', app: 'Chất chống cháy trong nhựa và vải, đạn chì gia cường độ cứng, pin ắc quy.' },
+            { z: 52, symbol: 'Te', name: 'Tellurium', mass: '128', category: 'Phi kim', period: 5, group: 'VIA', col: 16, row: 5, config: '[Kr] 4d¹⁰ 5s² 5p⁴', valence: '6', ox: '-2, +4, +6', en: '2.10', state: 'Rắn', app: 'Làm màng mỏng tế bào quang điện mặt trời, chất phụ gia cải thiện cơ tính thép.' },
+            { z: 53, symbol: 'I', name: 'Iodine (I-ốt)', mass: '127', category: 'Phi kim', period: 5, group: 'VIIA', col: 17, row: 5, config: '[Kr] 4d¹⁰ 5s² 5p⁵', valence: '7', ox: '-1, +1, +3, +5, +7', en: '2.66', state: 'Rắn', app: 'Sát trùng y tế (Cồn I-ốt), vi lượng tuyến giáp phòng ngừa bệnh bướu cổ.' },
+            { z: 54, symbol: 'Xe', name: 'Xenon', mass: '131', category: 'Khí hiếm', period: 5, group: 'VIIIA', col: 18, row: 5, config: '[Kr] 4d¹⁰ 5s² 5p⁶', valence: '8', ox: '0', en: '2.60', state: 'Khí', app: 'Đèn pha siêu sáng Xeon ô tô, thuốc gây mê y khoa, động cơ đẩy ion phi thuyền.' },
+
+            { z: 55, symbol: 'Cs', name: 'Caesium', mass: '133', category: 'Kim loại', period: 6, group: 'IA', col: 1, row: 6, config: '[Xe] 6s¹', valence: '1', ox: '+1', en: '0.79', state: 'Rắn', app: 'Đồng hồ nguyên tử chuẩn mực giây quốc tế, chất lỏng khoan giếng dầu sâu.' },
+            { z: 56, symbol: 'Ba', name: 'Barium', mass: '137', category: 'Kim loại', period: 6, group: 'IIA', col: 2, row: 6, config: '[Xe] 6s²', valence: '2', ox: '+2', en: '0.89', state: 'Rắn', app: 'Chất tương phản cản quang chụp X-quang dạ dày (BaSO4), tạo pháo hoa xanh lá cay.' },
+
+            // Lanthanides (57 - 71)
+            { z: 57, symbol: 'La', name: 'Lanthanum', mass: '139', category: 'Kim loại', period: 6, group: 'IIIB', col: 3, row: 8, innerGroup: 'lanthanide', config: '[Xe] 5d¹ 6s²', valence: '3', ox: '+3', en: '1.10', state: 'Rắn', app: 'Pin xe hybrid (Toyota Prius), ống kính camera chất lượng cao.' },
+            { z: 58, symbol: 'Ce', name: 'Cerium', mass: '140', category: 'Kim loại', period: 6, group: 'IIIB', col: 4, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹ 5d¹ 6s²', valence: '3,4', ox: '+3, +4', en: '1.12', state: 'Rắn', app: 'Đá lửa trong bật lửa, chất đánh bóng kính chính xác cao.' },
+            { z: 59, symbol: 'Pr', name: 'Praseodymium', mass: '141', category: 'Kim loại', period: 6, group: 'IIIB', col: 5, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f³ 6s²', valence: '3', ox: '+3', en: '1.13', state: 'Rắn', app: 'Kính bảo hộ thợ hàn (lọc ánh sáng vàng gắt), nam châm cường độ cao.' },
+            { z: 60, symbol: 'Nd', name: 'Neodymium', mass: '144', category: 'Kim loại', period: 6, group: 'IIIB', col: 6, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f⁴ 6s²', valence: '3', ox: '+3', en: '1.14', state: 'Rắn', app: 'Nam châm siêu mạnh Neodymium (NdFeB) trong tai nghe, quạt gió gia đình, xe điện.' },
+            { z: 61, symbol: 'Pm', name: 'Promethium', mass: '145', category: 'Kim loại', period: 6, group: 'IIIB', col: 7, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f⁵ 6s²', valence: '3', ox: '+3', en: '1.13', state: 'Rắn', app: 'Nguồn phát ánh sáng huỳnh quang tự phát trong tối, pin hạt nhân siêu nhỏ.' },
+            { z: 62, symbol: 'Sm', name: 'Samarium', mass: '150', category: 'Kim loại', period: 6, group: 'IIIB', col: 8, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f⁶ 6s²', valence: '2,3', ox: '+2, +3', en: '1.17', state: 'Rắn', app: 'Nam châm Samarium-Cobalt chịu nhiệt độ cực cao, điều trị ung thư xương.' },
+            { z: 63, symbol: 'Eu', name: 'Europium', mass: '152', category: 'Kim loại', period: 6, group: 'IIIB', col: 9, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f⁷ 6s²', valence: '2,3', ox: '+2, +3', en: '1.20', state: 'Rắn', app: 'Bảo mật tiền giấy Euro (chất phát quang chống giả), màu đỏ màn hình TV.' },
+            { z: 64, symbol: 'Gd', name: 'Gadolinium', mass: '157', category: 'Kim loại', period: 6, group: 'IIIB', col: 10, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f⁷ 5d¹ 6s²', valence: '3', ox: '+3', en: '1.20', state: 'Rắn', app: 'Thuốc tương phản từ trong chụp cộng hưởng từ MRI Y tế.' },
+            { z: 65, symbol: 'Tb', name: 'Terbium', mass: '159', category: 'Kim loại', period: 6, group: 'IIIB', col: 11, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f⁹ 6s²', valence: '3', ox: '+3', en: '1.20', state: 'Rắn', app: 'Bột phát quang màu xanh lá cây trong bóng đèn tiết kiệm điện, màn hình x-quang.' },
+            { z: 66, symbol: 'Dy', name: 'Dysprosium', mass: '162.5', category: 'Kim loại', period: 6, group: 'IIIB', col: 12, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹⁰ 6s²', valence: '3', ox: '+3', en: '1.22', state: 'Rắn', app: 'Phụ gia giúp nam châm động cơ xe điện không bị mất từ tính ở nhiệt độ cao.' },
+            { z: 67, symbol: 'Ho', name: 'Holmium', mass: '165', category: 'Kim loại', period: 6, group: 'IIIB', col: 13, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹¹ 6s²', valence: '3', ox: '+3', en: '1.23', state: 'Rắn', app: 'Laser Holmium điều trị sỏi thận, tạo từ trường siêu mạnh.' },
+            { z: 68, symbol: 'Er', name: 'Erbium', mass: '167', category: 'Kim loại', period: 6, group: 'IIIB', col: 14, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹² 6s²', valence: '3', ox: '+3', en: '1.24', state: 'Rắn', app: 'Bộ khuếch đại tín hiệu quang học xuyên đại dương trong cáp quang internet.' },
+            { z: 69, symbol: 'Tm', name: 'Thulium', mass: '169', category: 'Kim loại', period: 6, group: 'IIIB', col: 15, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹³ 6s²', valence: '3', ox: '+3', en: '1.25', state: 'Rắn', app: 'Nguồn tia X di động không cần nguồn điện ngoài cho y tế chiến trường.' },
+            { z: 70, symbol: 'Yb', name: 'Ytterbium', mass: '173', category: 'Kim loại', period: 6, group: 'IIIB', col: 16, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹⁴ 6s²', valence: '2,3', ox: '+2, +3', en: '1.10', state: 'Rắn', app: 'Đồng hồ nguyên tử quang học siêu chính xác, cảm biến áp suất chấn động.' },
+            { z: 71, symbol: 'Lu', name: 'Lutetium', mass: '175', category: 'Kim loại', period: 6, group: 'IIIB', col: 17, row: 8, innerGroup: 'lanthanide', config: '[Xe] 4f¹⁴ 5d¹ 6s²', valence: '3', ox: '+3', en: '1.27', state: 'Rắn', app: 'Xúc tác trong các nhà máy lọc dầu hóa chất, máy quét PET y tế.' },
+
+            // Period 6 continues (72 - 86)
+            { z: 72, symbol: 'Hf', name: 'Hafnium', mass: '178.5', category: 'Kim loại', period: 6, group: 'IVB', col: 4, row: 6, config: '[Xe] 4f¹⁴ 5d² 6s²', valence: '4', ox: '+4', en: '1.30', state: 'Rắn', app: 'Cách điện trong bộ vi xử lý máy tính thế hệ mới, thanh khống chế tàu ngầm hạt nhân.' },
+            { z: 73, symbol: 'Ta', name: 'Tantalum', mass: '181', category: 'Kim loại', period: 6, group: 'VB', col: 5, row: 6, config: '[Xe] 4f¹⁴ 5d³ 6s²', valence: '5', ox: '+5', en: '1.50', state: 'Rắn', app: 'Tụ điện tantalum siêu nhỏ trong smartphone, dụng cụ phẫu thuật không phản ứng cơ thể.' },
+            { z: 74, symbol: 'W', name: 'Tungsten (Vonfram)', mass: '184', category: 'Kim loại', period: 6, group: 'VIB', col: 6, row: 6, config: '[Xe] 4f¹⁴ 5d⁴ 6s²', valence: '6', ox: '+6', en: '2.36', state: 'Rắn', app: 'Nhiệt độ nóng chảy cao nhất trong các kim loại (3422°C): dây tóc bóng đèn, mũi khoan đá.' },
+            { z: 75, symbol: 'Re', name: 'Rhenium', mass: '186', category: 'Kim loại', period: 6, group: 'VIIB', col: 7, row: 6, config: '[Xe] 4f¹⁴ 5d⁵ 6s²', valence: '7', ox: '+7', en: '1.90', state: 'Rắn', app: 'Cánh quạt động cơ phản lực máy bay chịu nhiệt cực hạn.' },
+            { z: 76, symbol: 'Os', name: 'Osmium', mass: '190', category: 'Kim loại', period: 6, group: 'VIIIB', col: 8, row: 6, config: '[Xe] 4f¹⁴ 5d⁶ 6s²', valence: '4', ox: '+4', en: '2.20', state: 'Rắn', app: 'Chất có khối lượng riêng lớn nhất tự nhiên (~22.59 g/cm³), ngòi bút máy cao cấp.' },
+            { z: 77, symbol: 'Ir', name: 'Iridium', mass: '192', category: 'Kim loại', period: 6, group: 'VIIIB', col: 9, row: 6, config: '[Xe] 4f¹⁴ 5d⁷ 6s²', valence: '4', ox: '+4', en: '2.20', state: 'Rắn', app: 'Bugi bạch kim-iridium cho xe hơi, nồi nấu tinh thể đơn siêu tinh khiết.' },
+            { z: 78, symbol: 'Pt', name: 'Platinum (Bạch kim)', mass: '195', category: 'Kim loại', period: 6, group: 'VIIIB', col: 10, row: 6, config: '[Xe] 4f¹⁴ 5d⁹ 6s¹', valence: '2,4', ox: '+2, +4', en: '2.28', state: 'Rắn', app: 'Trang sức xa xỉ, xúc tác hóa học chống ô nhiễm, thuốc hóa trị ung thư Cisplatin.' },
+            { z: 79, symbol: 'Au', name: 'Gold (Vàng)', mass: '197', category: 'Kim loại', period: 6, group: 'IB', col: 11, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s¹', valence: '1,3', ox: '+1, +3', en: '2.54', state: 'Rắn', app: 'Dự trữ tài chính quốc gia, trang sức, mạ mạch điện vi mô không gỉ sét.' },
+            { z: 80, symbol: 'Hg', name: 'Mercury (Thủy ngân)', mass: '201', category: 'Kim loại', period: 6, group: 'IIB', col: 12, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s²', valence: '1,2', ox: '+1, +2', en: '2.00', state: 'Lỏng', app: 'Kim loại duy nhất dạng lỏng ở nhiệt độ phòng, dùng trong nhiệt kế cổ điển, công tắc thủy ngân.' },
+            { z: 81, symbol: 'Tl', name: 'Thallium', mass: '204', category: 'Kim loại', period: 6, group: 'IIIA', col: 13, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹', valence: '1,3', ox: '+1, +3', en: '1.62', state: 'Rắn', app: 'Cảm biến tia hồng ngoại tử ngoại, kính thủy tinh có chỉ số khúc xạ cực cao.' },
+            { z: 82, symbol: 'Pb', name: 'Lead (Chì)', mass: '207', category: 'Kim loại', period: 6, group: 'IVA', col: 14, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²', valence: '2,4', ox: '+2, +4', en: '2.33', state: 'Rắn', app: 'Tấm chắn bảo vệ chống tia X/phóng xạ trong y tế, pin ắc quy xe máy ô tô.' },
+            { z: 83, symbol: 'Bi', name: 'Bismuth', mass: '209', category: 'Kim loại', period: 6, group: 'VA', col: 15, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³', valence: '3,5', ox: '+3, +5', en: '2.02', state: 'Rắn', app: 'Thuốc dạ dày Pepto-Bismol, cầu chì tự ngắt an toàn nhiệt độ thấp.' },
+            { z: 84, symbol: 'Po', name: 'Polonium', mass: '209', category: 'Kim loại', period: 6, group: 'VIA', col: 16, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴', valence: '2,4', ox: '+2, +4', en: '2.00', state: 'Rắn', app: 'Nguồn phát nhiệt phóng xạ trong tàu không gian, thiết bị khử tĩnh điện công nghiệp.' },
+            { z: 85, symbol: 'At', name: 'Astatine', mass: '210', category: 'Phi kim', period: 6, group: 'VIIA', col: 17, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵', valence: '7', ox: '-1, +1, +5', en: '2.20', state: 'Rắn', app: 'Nguyên tố tự nhiên hiếm nhất trên vỏ Trái Đất; nghiên cứu trị liệu bức xạ ung thư.' },
+            { z: 86, symbol: 'Rn', name: 'Radon', mass: '222', category: 'Khí hiếm', period: 6, group: 'VIIIA', col: 18, row: 6, config: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶', valence: '8', ox: '0', en: '-', state: 'Khí', app: 'Khí phóng xạ tự nhiên; ứng dụng điều trị xạ trị ngắn hạn trong y học.' },
+
+            { z: 87, symbol: 'Fr', name: 'Francium', mass: '223', category: 'Kim loại', period: 7, group: 'IA', col: 1, row: 7, config: '[Rn] 7s¹', valence: '1', ox: '+1', en: '0.70', state: 'Rắn', app: 'Cực kỳ không bền, ứng dụng chủ yếu trong nghiên cứu cấu trúc nguyên tử laser.' },
+            { z: 88, symbol: 'Ra', name: 'Radium', mass: '226', category: 'Kim loại', period: 7, group: 'IIA', col: 2, row: 7, config: '[Rn] 7s²', valence: '2', ox: '+2', en: '0.90', state: 'Rắn', app: 'Được Marie Curie phát hiện; từng làm sơn dạ quang kim đồng hồ (nay ngưng vì độc phóng xạ).' },
+
+            // Actinides (89 - 103)
+            { z: 89, symbol: 'Ac', name: 'Actinium', mass: '227', category: 'Kim loại', period: 7, group: 'IIIB', col: 3, row: 9, innerGroup: 'actinide', config: '[Rn] 6d¹ 7s²', valence: '3', ox: '+3', en: '1.10', state: 'Rắn', app: 'Nguồn phát tia neutron, nghiên cứu liệu pháp tia alpha hướng mục tiêu u.' },
+            { z: 90, symbol: 'Th', name: 'Thorium', mass: '232', category: 'Kim loại', period: 7, group: 'IIIB', col: 4, row: 9, innerGroup: 'actinide', config: '[Rn] 6d² 7s²', valence: '4', ox: '+4', en: '1.30', state: 'Rắn', app: 'Nhiên liệu tiềm năng cho lò phản ứng hạt nhân thế hệ mới an toàn hơn U-235.' },
+            { z: 91, symbol: 'Pa', name: 'Protactinium', mass: '231', category: 'Kim loại', period: 7, group: 'IIIB', col: 5, row: 9, innerGroup: 'actinide', config: '[Rn] 5f² 6d¹ 7s²', valence: '5', ox: '+5', en: '1.50', state: 'Rắn', app: 'Hiếm và độc hại cao, chủ yếu dùng trong nghiên cứu địa chất định tuổi trầm tích.' },
+            { z: 92, symbol: 'U', name: 'Uranium', mass: '238', category: 'Kim loại', period: 7, group: 'IIIB', col: 6, row: 9, innerGroup: 'actinide', config: '[Rn] 5f³ 6d¹ 7s²', valence: '6', ox: '+3, +4, +5, +6', en: '1.38', state: 'Rắn', app: 'Nhiên liệu chính trong nhà máy điện hạt nhân và tàu ngầm hạt nhân.' },
+            { z: 93, symbol: 'Np', name: 'Neptunium', mass: '237', category: 'Kim loại', period: 7, group: 'IIIB', col: 7, row: 9, innerGroup: 'actinide', config: '[Rn] 5f⁴ 6d¹ 7s²', valence: '5', ox: '+3, +4, +5, +6', en: '1.36', state: 'Rắn', app: 'Sản phẩm phụ lò phản ứng, thiết bị phát hiện neutron.' },
+            { z: 94, symbol: 'Pu', name: 'Plutonium', mass: '239', category: 'Kim loại', period: 7, group: 'IIIB', col: 8, row: 9, innerGroup: 'actinide', config: '[Rn] 5f⁶ 7s²', valence: '4', ox: '+3, +4, +5, +6', en: '1.28', state: 'Rắn', app: 'Pin nhiệt điện vũ trụ cho tàu Voyager/Curiosity Rover đi xa Trái Đất.' },
+            { z: 95, symbol: 'Am', name: 'Americium', mass: '243', category: 'Kim loại', period: 7, group: 'IIIB', col: 9, row: 9, innerGroup: 'actinide', config: '[Rn] 5f⁷ 7s²', valence: '3', ox: '+3, +4', en: '1.30', state: 'Rắn', app: 'Cảm biến ion hóa báo động khói trong gia đình.' },
+            { z: 96, symbol: 'Cm', name: 'Curium', mass: '247', category: 'Kim loại', period: 7, group: 'IIIB', col: 10, row: 9, innerGroup: 'actinide', config: '[Rn] 5f⁷ 6d¹ 7s²', valence: '3', ox: '+3, +4', en: '1.30', state: 'Rắn', app: 'Phân tích thành phần khoáng vật trên Sao Hỏa (Máy phổ tia X Alpha).' },
+            { z: 97, symbol: 'Bk', name: 'Berkelium', mass: '247', category: 'Kim loại', period: 7, group: 'IIIB', col: 11, row: 9, innerGroup: 'actinide', config: '[Rn] 5f⁹ 7s²', valence: '3,4', ox: '+3, +4', en: '1.30', state: 'Rắn', app: 'Dùng tổng hợp các nguyên tố siêu nặng như Tennessine (117).' },
+            { z: 98, symbol: 'Cf', name: 'Californium', mass: '251', category: 'Kim loại', period: 7, group: 'IIIB', col: 12, row: 9, innerGroup: 'actinide', config: '[Rn] 5f¹⁰ 7s²', valence: '3', ox: '+3', en: '1.30', state: 'Rắn', app: 'Khởi động lò phản ứng hạt nhân, đo độ ẩm bê tông và dầu mỏ.' },
+            { z: 99, symbol: 'Es', name: 'Einsteinium', mass: '252', category: 'Kim loại', period: 7, group: 'IIIB', col: 13, row: 9, innerGroup: 'actinide', config: '[Rn] 5f¹¹ 7s²', valence: '3', ox: '+3', en: '1.30', state: 'Rắn', app: 'Phát hiện lần đầu trong vụ thử bom nhiệt hạch (1952); dùng trong nghiên cứu cơ bản.' },
+            { z: 100, symbol: 'Fm', name: 'Fermium', mass: '257', category: 'Kim loại', period: 7, group: 'IIIB', col: 14, row: 9, innerGroup: 'actinide', config: '[Rn] 5f¹² 7s²', valence: '3', ox: '+3', en: '1.30', state: 'Rắn', app: 'Chỉ tạo ra được lượng siêu nhỏ trong phòng thí nghiệm.' },
+            { z: 101, symbol: 'Md', name: 'Mendelevium', mass: '258', category: 'Kim loại', period: 7, group: 'IIIB', col: 15, row: 9, innerGroup: 'actinide', config: '[Rn] 5f¹³ 7s²', valence: '2,3', ox: '+2, +3', en: '1.30', state: 'Rắn', app: 'Đặt theo tên Mendeleev - cha đẻ bảng tuần hoàn.' },
+            { z: 102, symbol: 'No', name: 'Nobelium', mass: '259', category: 'Kim loại', period: 7, group: 'IIIB', col: 16, row: 9, innerGroup: 'actinide', config: '[Rn] 5f¹⁴ 7s²', valence: '2,3', ox: '+2, +3', en: '1.30', state: 'Rắn', app: 'Đặt theo tên Alfred Nobel; dùng nghiên cứu tính chất hóa học các nguyên tố actinides.' },
+            { z: 103, symbol: 'Lr', name: 'Lawrencium', mass: '266', category: 'Kim loại', period: 7, group: 'IIIB', col: 17, row: 9, innerGroup: 'actinide', config: '[Rn] 5f¹⁴ 6d¹ 7s²', valence: '3', ox: '+3', en: '-', state: 'Rắn', app: 'Nguyên tố cuối cùng của họ Actinide.' },
+
+            // Transactinides (104 - 118)
+            { z: 104, symbol: 'Rf', name: 'Rutherfordium', mass: '267', category: 'Kim loại', period: 7, group: 'IVB', col: 4, row: 7, config: '[Rn] 5f¹⁴ 6d² 7s²', valence: '4', ox: '+4', en: '-', state: 'Rắn', app: 'Nguyên tố siêu nặng tổng hợp nhân tạo.' },
+            { z: 105, symbol: 'Db', name: 'Dubnium', mass: '268', category: 'Kim loại', period: 7, group: 'VB', col: 5, row: 7, config: '[Rn] 5f¹⁴ 6d³ 7s²', valence: '5', ox: '+5', en: '-', state: 'Rắn', app: 'Nghiên cứu phản ứng hạt nhân tổng hợp.' },
+            { z: 106, symbol: 'Sg', name: 'Seaborgium', mass: '269', category: 'Kim loại', period: 7, group: 'VIB', col: 6, row: 7, config: '[Rn] 5f¹⁴ 6d⁴ 7s²', valence: '6', ox: '+6', en: '-', state: 'Rắn', app: 'Đặt theo tên nhà hóa học Glenn Seaborg.' },
+            { z: 107, symbol: 'Bh', name: 'Bohrium', mass: '270', category: 'Kim loại', period: 7, group: 'VIIB', col: 7, row: 7, config: '[Rn] 5f¹⁴ 6d⁵ 7s²', valence: '7', ox: '+7', en: '-', state: 'Rắn', app: 'Nghiên cứu vật lý hạt nhân lý thuyết.' },
+            { z: 108, symbol: 'Hs', name: 'Hassium', mass: '277', category: 'Kim loại', period: 7, group: 'VIIIB', col: 8, row: 7, config: '[Rn] 5f¹⁴ 6d⁶ 7s²', valence: '8', ox: '+8', en: '-', state: 'Rắn', app: 'Tổng hợp trong máy gia tốc ion nặng.' },
+            { z: 109, symbol: 'Mt', name: 'Meitnerium', mass: '278', category: 'Kim loại', period: 7, group: 'VIIIB', col: 9, row: 7, config: '[Rn] 5f¹⁴ 6d⁷ 7s²', valence: '9', ox: '+3, +6', en: '-', state: 'Rắn', app: 'Đặt tên vinh danh Lise Meitner.' },
+            { z: 110, symbol: 'Ds', name: 'Darmstadtium', mass: '281', category: 'Kim loại', period: 7, group: 'VIIIB', col: 10, row: 7, config: '[Rn] 5f¹⁴ 6d⁸ 7s²', valence: '10', ox: '+2, +4', en: '-', state: 'Rắn', app: 'Tổng hợp tại Darmstadt, Đức.' },
+            { z: 111, symbol: 'Rg', name: 'Roentgenium', mass: '282', category: 'Kim loại', period: 7, group: 'IB', col: 11, row: 7, config: '[Rn] 5f¹⁴ 6d⁹ 7s²', valence: '11', ox: '+1, +3', en: '-', state: 'Rắn', app: 'Đặt tên theo Wilhelm Röntgen (người tìm ra tia X).' },
+            { z: 112, symbol: 'Cn', name: 'Copernicium', mass: '285', category: 'Kim loại', period: 7, group: 'IIB', col: 12, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s²', valence: '2', ox: '+2', en: '-', state: 'Rắn', app: 'Vinh danh nhà thiên văn học Nicolaus Copernicus.' },
+            { z: 113, symbol: 'Nh', name: 'Nihonium', mass: '286', category: 'Kim loại', period: 7, group: 'IIIA', col: 13, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹', valence: '3', ox: '+1, +3', en: '-', state: 'Rắn', app: 'Nguyên tố đầu tiên do các nhà khoa học Châu Á (Nhật Bản) phát hiện.' },
+            { z: 114, symbol: 'Fl', name: 'Flerovium', mass: '289', category: 'Kim loại', period: 7, group: 'IVA', col: 14, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²', valence: '4', ox: '+2, +4', en: '-', state: 'Rắn', app: 'Tổng hợp nhân tạo tại viện JINR (Nga).' },
+            { z: 115, symbol: 'Mc', name: 'Moscovium', mass: '290', category: 'Kim loại', period: 7, group: 'VA', col: 15, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³', valence: '5', ox: '+1, +3, +5', en: '-', state: 'Rắn', app: 'Đặt tên theo thủ đô Moscow, Nga.' },
+            { z: 116, symbol: 'Lv', name: 'Livermorium', mass: '293', category: 'Kim loại', period: 7, group: 'VIA', col: 16, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴', valence: '6', ox: '+2, +4, +6', en: '-', state: 'Rắn', app: 'Hợp tác giữa Mỹ và Nga trong thí nghiệm hạt nhân.' },
+            { z: 117, symbol: 'Ts', name: 'Tennessine', mass: '294', category: 'Phi kim', period: 7, group: 'VIIA', col: 17, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵', valence: '7', ox: '-1, +1, +5, +7', en: '-', state: 'Rắn', app: 'Thuộc nhóm Halogen siêu nặng.' },
+            { z: 118, symbol: 'Og', name: 'Oganesson', mass: '294', category: 'Khí hiếm', period: 7, group: 'VIIIA', col: 18, row: 7, config: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶', valence: '8', ox: '0, +2, +4', en: '-', state: 'Rắn', app: 'Nguyên tố cuối cùng trong Bảng tuần hoàn hiện tại, vinh danh Yuri Oganessian.' }
+        ]
+window.addEventListener('DOMContentLoaded', () => {
+    const elementZ = window.location.hash.replace('#', ''); // Đọc mã sau dấu #
+
+    if (elementZ && typeof elementsData !== 'undefined') {
+        setTimeout(() => {
+            const targetElement = elementsData.find(item => item.z === Number(elementZ));
+            if (targetElement) {
+                if (typeof openElementModal === 'function') {
+                    openElementModal(targetElement);
+                }
+            }
+        }, 300);
+    }
+});
+        /**
+         * CALCULATE TOTAL ATOMIC ORBITALS (AO)
+         * Formula according to SGK Chemistry rules based on electron subshells:
+         * s = 1 AO, p = 3 AO, d = 5 AO, f = 7 AO
+         */
+        function calculateTotalAO(z) {
+            // Count full & partial subshells for electron count Z
+            const subshells = [
+                { name: '1s', capacity: 2, ao: 1 },
+                { name: '2s', capacity: 2, ao: 1 },
+                { name: '2p', capacity: 6, ao: 3 },
+                { name: '3s', capacity: 2, ao: 1 },
+                { name: '3p', capacity: 6, ao: 3 },
+                { name: '4s', capacity: 2, ao: 1 },
+                { name: '3d', capacity: 10, ao: 5 },
+                { name: '4p', capacity: 6, ao: 3 },
+//                { name: '5s', capacity: 2, ao: 1 },
+                { name: '4d', capacity: 10, ao: 5 },
+                { name: '5p', capacity: 6, ao: 3 },
+                { name: '6s', capacity: 2, ao: 1 },
+                { name: '4f', capacity: 14, ao: 7 },
+                { name: '5d', capacity: 10, ao: 5 },
+                { name: '6p', capacity: 6, ao: 3 },
+                { name: '7s', capacity: 2, ao: 1 },
+                { name: '5f', capacity: 14, ao: 7 },
+                { name: '6d', capacity: 10, ao: 5 },
+                { name: '7p', capacity: 6, ao: 3 }
+            ];
+
+            let remainingElectrons = z;
+            let totalAO = 0;
+
+            for (let sub of subshells) {
+                if (remainingElectrons <= 0) break;
+                if (remainingElectrons >= sub.capacity) {
+                    totalAO += sub.ao;
+                    remainingElectrons -= sub.capacity;
+                } else {
+                    // For partially filled subshell, AO occupied is ceiling of electrons/2 or orbital capacity
+                    if (sub.name.includes('s')) totalAO += 1;
+                    else if (sub.name.includes('p')) totalAO += Math.min(3, Math.ceil(remainingElectrons / 2) || 1);
+                    else if (sub.name.includes('d')) totalAO += Math.min(5, Math.ceil(remainingElectrons / 2) || 1);
+                    else if (sub.name.includes('f')) totalAO += Math.min(7, Math.ceil(remainingElectrons / 2) || 1);
+                    break;
+                }
+            }
+            return totalAO;
+        }
+
+        /**
+         * Get category color variables matching SGK standard
+         */
+        function getCategoryBg(cat) {
+            switch (cat) {
+                case 'Kim loại': return 'bg-[#7bc3b9] hover:bg-[#65b2a7] text-slate-900';
+                case 'Phi kim': return 'bg-[#f89bb4] hover:bg-[#e7829d] text-slate-900';
+                case 'Khí hiếm': return 'bg-[#ffd11a] hover:bg-[#ebd000] text-slate-900';
+                default: return 'bg-slate-700 text-slate-100';
+            }
+        }
+
+        function getCategoryBadgeClass(cat) {
+            switch (cat) {
+                case 'Kim loại': return 'bg-[#7bc3b9] text-slate-950';
+                case 'Phi kim': return 'bg-[#f89bb4] text-slate-950';
+                case 'Khí hiếm': return 'bg-[#ffd11a] text-slate-950';
+                default: return 'bg-slate-700 text-slate-100';
+            }
+        }
+
+        /**
+         * RENDER PERIODIC TABLE TILES
+         */
+        function renderPeriodicTable() {
+            const mainGrid = document.getElementById('periodicGrid');
+            const lanthGrid = document.getElementById('lanthanidesGrid');
+            const actGrid = document.getElementById('actinidesGrid');
+
+            mainGrid.innerHTML = '';
+            lanthGrid.innerHTML = '';
+            actGrid.innerHTML = '';
+
+            // Map grid positions for main 18x7 table
+            const gridMap = {};
+            elementsData.forEach(el => {
+                if (!el.innerGroup) {
+                    gridMap[`${el.row}-${el.col}`] = el;
+                }
+            });
+
+            // 1. Render 7 rows x 18 cols for Main Grid
+            for (let r = 1; r <= 7; r++) {
+                for (let c = 1; c <= 18; c++) {
+                    const el = gridMap[`${r}-${c}`];
+                    
+                    // Special placeholders for Lanthanides & Actinides series in main table
+                    if (r === 6 && c === 3) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'w-full h-14 rounded-lg bg-teal-950/40 border border-teal-500/40 flex flex-col justify-center items-center text-[10px] text-teal-300 font-bold p-1 text-center cursor-pointer hover:bg-teal-900/60 transition-all';
+                        placeholder.innerHTML = '57-71<br><span class="text-[9px] font-normal">Lanthanide</span>';
+                        placeholder.onclick = () => filterCategory('Kim loại');
+                        mainGrid.appendChild(placeholder);
+                        continue;
+                    }
+                    if (r === 7 && c === 3) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'w-full h-14 rounded-lg bg-pink-950/40 border border-pink-500/40 flex flex-col justify-center items-center text-[10px] text-pink-300 font-bold p-1 text-center cursor-pointer hover:bg-pink-900/60 transition-all';
+                        placeholder.innerHTML = '89-103<br><span class="text-[9px] font-normal">Actinide</span>';
+                        placeholder.onclick = () => filterCategory('Kim loại');
+                        mainGrid.appendChild(placeholder);
+                        continue;
+                    }
+
+                    if (el) {
+                        mainGrid.appendChild(createElementTile(el));
+                    } else {
+                        // Empty slot
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = 'w-full h-14';
+                        mainGrid.appendChild(emptySlot);
+                    }
+                }
+            }
+
+            // 2. Render Lanthanides Row (57-71)
+            const lanths = elementsData.filter(e => e.innerGroup === 'lanthanide');
+            lanths.forEach(el => lanthGrid.appendChild(createElementTile(el)));
+
+            // 3. Render Actinides Row (89-103)
+            const acts = elementsData.filter(e => e.innerGroup === 'actinide');
+            acts.forEach(el => actGrid.appendChild(createElementTile(el)));
+        }
+
+        /**
+         * Create individual element tile element
+         */
+        function createElementTile(el) {
+            const tile = document.createElement('div');
+            const colorClass = getCategoryBg(el.category);
+            
+            tile.className = `element-tile ${colorClass} w-full h-14 rounded-lg p-1 flex flex-col justify-between font-bold cursor-pointer relative shadow-sm border border-slate-900/10`;
+            tile.dataset.z = el.z;
+            tile.dataset.symbol = el.symbol.toLowerCase();
+            tile.dataset.name = el.name.toLowerCase();
+            tile.dataset.category = el.category;
+
+            tile.innerHTML = `
+                <div class="flex justify-between items-center text-[9px] leading-none opacity-80">
+                    <span>${el.z}</span>
+                    <span class="text-[8px] font-normal">${el.en !== '-' ? el.en : ''}</span>
+                </div>
+                <div class="text-center my-0">
+                    <span class="text-base font-black leading-none tracking-tight block">${el.symbol}</span>
+                    <span class="text-[9px] font-semibold truncate block leading-tight opacity-90">${el.name}</span>
+                </div>
+                <div class="text-center text-[9px] font-black leading-none opacity-80 pt-0.5 border-t border-black/10">
+                    ${el.mass}
+                </div>
+            `;
+
+            tile.onclick = () => openElementModal(el);
+            return tile;
+        }
+
+        /**
+         * SEARCH & FILTER LOGIC
+         */
+        let currentFilter = 'all';
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const tiles = document.querySelectorAll('.element-tile');
+
+            tiles.forEach(tile => {
+                const z = tile.dataset.z;
+                const symbol = tile.dataset.symbol;
+                const name = tile.dataset.name;
+                const category = tile.dataset.category;
+
+                const matchesSearch = !query || z.includes(query) || symbol.includes(query) || name.includes(query);
+                const matchesCategory = (currentFilter === 'all') || (category === currentFilter);
+
+                if (matchesSearch && matchesCategory) {
+                    tile.classList.remove('dimmed');
+                } else {
+                    tile.classList.add('dimmed');
+                }
+            });
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === cat) {
+                    btn.classList.add('bg-slate-700', 'text-white');
+                    btn.classList.remove('text-slate-300');
+                } else {
+                    btn.classList.remove('bg-slate-700', 'text-white');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+            applyFilters();
+        }
+
+        /**
+         * BOHR ATOM MODEL CANVAS ANIMATION
+         */
+        let bohrAnimationId = null;
+
+        function drawBohrModel(z, symbol) {
+            const canvas = document.getElementById('bohrCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // Determine electron distribution across shells K, L, M, N, O, P, Q (Max: 2, 8, 18, 32, 32, 18, 8)
+            const shellCapacities = [2, 8, 18, 32, 32, 18, 8];
+            let remaining = z;
+            const shells = [];
+
+            for (let cap of shellCapacities) {
+                if (remaining <= 0) break;
+                let count = Math.min(remaining, cap);
+                shells.push(count);
+                remaining -= count;
+            }
+
+            let angleOffset = 0;
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw Nucleus
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 16, 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a';
+                ctx.fill();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = 'bold 12px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(symbol, centerX, centerY);
+
+                // Draw Shells & Orbiting Electrons
+                const maxRadius = Math.min(width, height) / 2 - 12;
+                const radiusStep = maxRadius / (shells.length + 0.8);
+
+                shells.forEach((electronCount, index) => {
+                    const radius = (index + 1) * radiusStep + 12;
+
+                    // Draw Orbit Circle
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([3, 3]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Draw Electrons on Orbit
+                    const speedMultiplier = (index % 2 === 0 ? 1 : -1) * (0.015 / (index + 1));
+                    
+                    for (let i = 0; i < electronCount; i++) {
+                        const angle = (i * 2 * Math.PI / electronCount) + (angleOffset * (index + 1) * 0.5);
+                        const x = centerX + radius * Math.cos(angle);
+                        const y = centerY + radius * Math.sin(angle);
+
+                        ctx.beginPath();
+                        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                });
+
+                angleOffset += 0.02;
+                bohrAnimationId = requestAnimationFrame(animate);
+            }
+
+            if (bohrAnimationId) cancelAnimationFrame(bohrAnimationId);
+            animate();
+        }
+
+        /**
+         * OPEN ELEMENT DETAIL MODAL
+         */
+        function openElementModal(el) {
+            const modal = document.getElementById('elementModal');
+            
+            // Tile Card in Header
+            const modalTile = document.getElementById('modalTile');
+            modalTile.className = `w-28 h-28 md:w-36 md:h-36 shrink-0 rounded-2xl p-3 flex flex-col justify-between font-bold shadow-2xl border-2 border-slate-900/30 text-slate-900 ${getCategoryBg(el.category)}`;
+            
+            document.getElementById('modalZ').innerText = el.z;
+            document.getElementById('modalElectronegativity').innerText = el.en !== '-' ? `ĐÂĐ: ${el.en}` : '';
+            document.getElementById('modalSymbol').innerText = el.symbol;
+            document.getElementById('modalVietnameseName').innerText = el.name;
+            document.getElementById('modalAtomicMass').innerText = el.mass;
+
+            // Primary Info
+            document.getElementById('modalTitle').innerText = `${el.name} (${el.symbol})`;
+            document.getElementById('modalSubTitle').innerText = `Số hiệu nguyên tử: Z = ${el.z}`;
+            
+            const badge = document.getElementById('modalCategoryBadge');
+            badge.innerText = el.category;
+            badge.className = `inline-block px-3 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase shadow ${getCategoryBadgeClass(el.category)}`;
+
+            document.getElementById('modalPeriod').innerText = el.period;
+            document.getElementById('modalGroup').innerText = el.group;
+            document.getElementById('modalState').innerText = el.state;
+
+            // Details Grid
+            document.getElementById('modalConfig').innerText = el.config;
+            
+            const totalAO = calculateTotalAO(el.z);
+            document.getElementById('modalAO').innerText = `${totalAO} AO`;
+            
+            document.getElementById('modalValence').innerText = `${el.valence} e`;
+            document.getElementById('modalOxidation').innerText = el.ox;
+            document.getElementById('modalElectronegativityFull').innerText = el.en;
+            document.getElementById('modalMassFull').innerText = `${el.mass} amu`;
+
+            document.getElementById('modalApplications').innerText = el.app;
+
+            // Show Modal & Start Canvas Bohr Visualizer
+            modal.classList.remove('hidden');
+            drawBohrModel(el.z, el.symbol);
+        }
+
+        function closeModal() {
+            document.getElementById('elementModal').classList.add('hidden');
+            if (bohrAnimationId) cancelAnimationFrame(bohrAnimationId);
+        }
+
+        /**
+         * INITIALIZATION & EVENT LISTENERS
+         */
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPeriodicTable();
+
+            // Search input listener
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+
+            searchInput.addEventListener('input', (e) => {
+                if (e.target.value) clearSearch.classList.remove('hidden');
+                else clearSearch.classList.add('hidden');
+                applyFilters();
+            });
+
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                clearSearch.classList.add('hidden');
+                applyFilters();
+            });
+
+            // Filter button listeners
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterCategory(btn.dataset.filter);
+                });
+            });
+
+            // Modal Close event listeners
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('elementModal').addEventListener('click', (e) => {
+                if (e.target.id === 'elementModal') closeModal();
+            });
+
+            // Keyboard ESC to close modal
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        });
+    </script>
+</body>
+</html>
